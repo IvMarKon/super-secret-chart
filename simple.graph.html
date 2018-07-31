@@ -50,13 +50,14 @@
         var parseTime = d3.timeParse("%d-%b-%y");
 
         var margin = {
-                top: 80,
-                right: 30,
-                bottom: 80,
-                left: 50
-            },
+            top: 80,
+            right: 30,
+            bottom: 80,
+            left: 50
+        },
             width = 1028 - margin.left - margin.right,
-            height = 470 - margin.top - margin.bottom;
+            height = 470 - margin.top - margin.bottom,
+            tickY = 5;
 
         // set the ranges
         var x = d3.scaleTime().range([0, width - 58]);
@@ -68,9 +69,11 @@
                 .ticks(d3.timeDay.every(20))
         }
         // gridlines in y axis function
-        function make_y_gridlines() {
+        function make_y_gridlines(data, tick) {
+            var max = d3.max(data, function (d) { return +d.close; });
+            var step = Math.round(max / tick);
             return d3.axisLeft(y)
-                .ticks(5)
+                .tickValues(d3.range(0, max, step))
         }
 
 
@@ -120,16 +123,16 @@
             // add the X gridlines
             svg.append("g")
                 .attr("class", "grid")
-                .attr("transform", "translate(0," + height + ")")
+                .attr("transform", "translate(0," + (height + 30) + ")")
                 .call(make_x_gridlines()
-                    .tickSize(-height)
+                    .tickSize(-height - 50)
                     .tickFormat("")
                 );
 
             // add the Y gridlines
             svg.append("g")
                 .attr("class", "grid")
-                .call(make_y_gridlines()
+                .call(make_y_gridlines(data, 5)
                     .tickSize(-width)
                     .tickFormat("")
                 );
@@ -154,6 +157,9 @@
                 .call(d3.axisBottom(x)
                     .tickFormat(d3.timeFormat("%B %d, %Y"))
                     .ticks(d3.timeDay.every(20)));
+
+            var max = d3.max(data, function (d) { return +d.close; });
+            var step = Math.round(max / 5);
             // Add the Y Axis
             svg.append("g")
                 .attr("class", "axisY")
@@ -163,11 +169,14 @@
                     .tickFormat(function (d) {
                         return d + " articles";
                     })
-                    .ticks(5));
+                    .tickValues(d3.range(0, max, step)));
 
             svg.selectAll(".axisY .tick text")
                 .attr("x", 20)
                 .attr("dy", -10);
+            svg.selectAll(".axisX .tick text")
+                .attr("x", 50);
+            // .attr("dy", -10);
         });
     </script>
 </body>
